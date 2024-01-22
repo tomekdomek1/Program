@@ -4,8 +4,8 @@
 #include <time.h>
 
 typedef struct Pytanie{
-    char tresc_pytania[50];
-    char mozliwe_odpowiedzi[4][50];
+    char tresc_pytania[200];
+    char mozliwe_odpowiedzi[4][100];
     int poprawna_odpowiedz;
 } Pytanie;
 
@@ -27,7 +27,7 @@ Element* wczytaj_pytania(Element* head, char* nazwa_pliku){
     if(plik == NULL){
         printf("Nie mozna otworzyc pliku");
     }
-    int max_rozmiar = 256;
+    int max_rozmiar = 600;
     char *bufer = malloc(sizeof(char)*max_rozmiar);
     
     //biore linie, tworze na jej podstawie pytanie, dodaje pytanie do listy
@@ -40,6 +40,7 @@ Element* wczytaj_pytania(Element* head, char* nazwa_pliku){
             i++;
             k++;
         }
+        pytanie.tresc_pytania[i] = '\0';
         i=0;
         k++;
         for(int j=0; j<4; j++){
@@ -84,14 +85,14 @@ int main(){
     /*
     Pytanie pierwsze;
     strcpy(pierwsze.tresc_pytania, "tresc");
-    pierwsze.poprawna_odpowiedz = '2';
+    pierwsze.poprawna_odpowiedz = 2;
     strcpy(pierwsze.mozliwe_odpowiedzi[0], "Odpowiedz pierwsza");
     strcpy(pierwsze.mozliwe_odpowiedzi[1], "Odpowiedz druga");
     strcpy(pierwsze.mozliwe_odpowiedzi[2], "Odpowiedz trzecia");
     strcpy(pierwsze.mozliwe_odpowiedzi[3], "Odpowiedz czwarta");
     Pytanie drugie;
     strcpy(drugie.tresc_pytania, "tresc");
-    drugie.poprawna_odpowiedz = '2';
+    drugie.poprawna_odpowiedz = 1;
     strcpy(drugie.mozliwe_odpowiedzi[0], "odp pierwsza");
     strcpy(drugie.mozliwe_odpowiedzi[1], "odp druga");
     strcpy(drugie.mozliwe_odpowiedzi[2], "odp trzecia");
