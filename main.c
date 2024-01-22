@@ -97,55 +97,34 @@ Element* usun_indeks(Element* head, int index){
     return head;
 }
 
-//NIE DZIALA
 //zakladam ze znam rozmiar listy (19) - do pobierania z funkcji wczytujacej +1 po ewentualnym dodaniu pytania
 Element* losuj_pytania(Element* head){
     Element* new_head = NULL;
     srand(time(0));
-    int rozmiar = 4;
-    int liczba_pytan = 2;
+    int rozmiar = 19;
+    int liczba_pytan = 12;
     for(int i=0; i<liczba_pytan; i++){
         Element* temp = head;
         int j, losowa = rand()%rozmiar;
-        for(j=0; j<losowa; j++){
+        for(j=0; j<losowa - i; j++){
             temp = temp->next;
         }
         new_head = dodaj_do_listy(new_head, temp->pytanie);
-        // dodac usuwanie wykorzystanych nodow
         head = usun_indeks(head, j);
     }
     return new_head;
 }
 
 int main(){
-    char *nazwa_pliku = "test.txt";
+    char *nazwa_pliku = "lista_pytan.txt";
     Element* head = NULL;
-    
-    //TESTY
-    /*
-    Pytanie pierwsze;
-    strcpy(pierwsze.tresc_pytania, "tresc");
-    pierwsze.poprawna_odpowiedz = 2;
-    strcpy(pierwsze.mozliwe_odpowiedzi[0], "Odpowiedz pierwsza");
-    strcpy(pierwsze.mozliwe_odpowiedzi[1], "Odpowiedz druga");
-    strcpy(pierwsze.mozliwe_odpowiedzi[2], "Odpowiedz trzecia");
-    strcpy(pierwsze.mozliwe_odpowiedzi[3], "Odpowiedz czwarta");
-    Pytanie drugie;
-    strcpy(drugie.tresc_pytania, "tresc");
-    drugie.poprawna_odpowiedz = 1;
-    strcpy(drugie.mozliwe_odpowiedzi[0], "odp pierwsza");
-    strcpy(drugie.mozliwe_odpowiedzi[1], "odp druga");
-    strcpy(drugie.mozliwe_odpowiedzi[2], "odp trzecia");
-    strcpy(drugie.mozliwe_odpowiedzi[3], "odp czwarta");
-    head = dodaj_do_listy(head, pierwsze);
-    head = dodaj_do_listy(head, drugie);
-    */
 
+    //NAJPIERW TRZEBA WCZYTAC PYTANIA A DOPIERO POZNIEJ LOSUJ_PYTANIA
+    //NAJPIERW TRZEBA WCZYTAC PYTANIA A DOPIERO POZNIEJ LOSUJ_PYTANIA
+    //NAJPIERW TRZEBA WCZYTAC PYTANIA A DOPIERO POZNIEJ LOSUJ_PYTANIA
     head = wczytaj_pytania(head, nazwa_pliku);
     //fajnie byloby losuj_pytania zapisac do innej zmiennej, zeby nie zgubic heada i zwolnic pamiec
     head = losuj_pytania(head);
-    //wypisz_liste(head);
-    //head = usun_indeks(head, 0);
     wypisz_liste(head);
 
     return 0;
