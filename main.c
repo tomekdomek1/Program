@@ -2,6 +2,17 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#define and &&
+#define or ||
+
+int safescanf() {
+    int zmienna;
+    while (scanf("%d", &zmienna) != 1) {
+        printf("Błędne dane. Podaj liczbę ponownie: ");
+        while (getchar() != '\n');
+    }
+    return zmienna;
+}
 
 typedef struct Pytanie{
     char tresc_pytania[200];
@@ -116,11 +127,63 @@ Element* losuj_pytania(Element* head){
     }
     return new_head;
 }
+void play(){
+    int test=0;
+    while(!test){
+        printf("Przed Toba bedzie 12 pytan. \n");
+        printf("Po kazdym pytaniu wyswietla Ci sie 4 odpowiedzi, Twoim zadaniem bedzie zaznaczyc poprawna odpowiedz.\n");
+        printf("By ulatwic Ci zostanie milionerem, do dyspozycji bedziesz mial 3 kola ratunkowe:\n");
+        printf("Pytanie do publicznosci, 50/50 oraz Telefon do przyjaciela. Kazdego z kol mozna uczyc tylko raz.\n");
+        printf("Czy zasady gry sa zrozumiale? Tak - 1 / Nie - 0\n");
+        printf(":");
+        int odp;
+        odp = safescanf();
+        if(odp==1){
+            test=1;
+        }
+        else if(odp!=0 and odp!=1){
+            printf("\nNie ma takiej opcji do wyboru, wyswietle zasady jeszcze raz.\n\n");
+        }
+        else{
+            printf("\nZatem powtorze zasady: \n\n");
+        }
+    }
+    printf("\nZatem zacznijmy gre!\n\n");
+}
+
 
 int main(){
     char *nazwa_pliku = "test.txt";
     Element* head = NULL;
+    while(1){
+        printf("Witamy w grze milionerzy!");
+        printf("Wybierz opcje: \n");
+        printf("1. Zagraj.\n");
+        printf("2. Dodaj pytanie.\n");
+        printf("3. Przywroc domyslne.\n");
+        printf("4. Wyjdz.\n");
+        int wybor;
+        wybor = safescanf();
+        switch(wybor){
+            case 1: 
+                printf("Rozpocznijmy gre!\n");
+                play();
+                break;
+            case 2:
+                printf("Tutaj dodamy pytanie.\n");
+                break;
+            case 3:
+                printf("Tutaj przywrocimy ustawienia domyslne.\n");
+                break;
+            case 4:
+                return 0;
+                break;
+            default:
+                printf("Nie ma takiej opcji! Sprobuj jeszcze raz!\n");
+                break;
+        }
     
+    }
     //TESTY
     /*
     Pytanie pierwsze;
@@ -143,10 +206,10 @@ int main(){
 
     head = wczytaj_pytania(head, nazwa_pliku);
     //fajnie byloby losuj_pytania zapisac do innej zmiennej, zeby nie zgubic heada i zwolnic pamiec
-    head = losuj_pytania(head);
+    //head = losuj_pytania(head);
     //wypisz_liste(head);
     //head = usun_indeks(head, 0);
-    wypisz_liste(head);
+    //wypisz_liste(head);
 
     return 0;
 }
