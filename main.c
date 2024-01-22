@@ -77,8 +77,48 @@ void wypisz_liste(Element* head){
     }
 }
 
+Element* usun_indeks(Element* head, int index){
+    Element* temp = head;
+    int i;
+    if (index == 0) {
+        head = head->next;
+        temp->next = NULL;
+        free(temp);
+    }
+    else {
+        for (i = 0; i < index - 1; i++) {
+            temp = temp->next;
+        }
+        Element* del = temp->next;
+        temp->next = temp->next->next;
+        del->next = NULL;
+        free(del);
+    }
+    return head;
+}
+
+//NIE DZIALA
+//zakladam ze znam rozmiar listy (19) - do pobierania z funkcji wczytujacej +1 po ewentualnym dodaniu pytania
+Element* losuj_pytania(Element* head){
+    Element* new_head = NULL;
+    srand(time(0));
+    int rozmiar = 4;
+    int liczba_pytan = 2;
+    for(int i=0; i<liczba_pytan; i++){
+        Element* temp = head;
+        int j, losowa = rand()%rozmiar;
+        for(j=0; j<losowa; j++){
+            temp = temp->next;
+        }
+        new_head = dodaj_do_listy(new_head, temp->pytanie);
+        // dodac usuwanie wykorzystanych nodow
+        head = usun_indeks(head, j);
+    }
+    return new_head;
+}
+
 int main(){
-    char *nazwa_pliku = "lista_pytan.txt";
+    char *nazwa_pliku = "test.txt";
     Element* head = NULL;
     
     //TESTY
@@ -102,6 +142,10 @@ int main(){
     */
 
     head = wczytaj_pytania(head, nazwa_pliku);
+    //fajnie byloby losuj_pytania zapisac do innej zmiennej, zeby nie zgubic heada i zwolnic pamiec
+    head = losuj_pytania(head);
+    //wypisz_liste(head);
+    //head = usun_indeks(head, 0);
     wypisz_liste(head);
 
     return 0;

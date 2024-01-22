@@ -1,0 +1,4 @@
+pytanie1:odpowiedz11:odpowiedz12:odpowiedz13:odpowiedz14:1
+pytanie2:odpowiedz21:odpowiedz22:odpowiedz23:odpowiedz24:2
+pytanie3:odpowiedz31:odpowiedz32:odpowiedz33:odpowiedz34:3
+pytanie4:odpowiedz41:odpowiedz42:odpowiedz43:odpowiedz44:4
