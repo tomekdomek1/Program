@@ -40,6 +40,7 @@ Element* wczytaj_pytania(Element* head, char* nazwa_pliku){
             i++;
             k++;
         }
+        //dodaje koniec str zeby moc printowac %s
         pytanie.tresc_pytania[i] = '\0';
         i=0;
         k++;
@@ -49,7 +50,6 @@ Element* wczytaj_pytania(Element* head, char* nazwa_pliku){
                 i++;
                 k++;
             }
-            //dodaje koniec str zeby moc printowac %s
             pytanie.mozliwe_odpowiedzi[j][i] = '\0';
             i=0;
             k++;
