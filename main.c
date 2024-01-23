@@ -15,7 +15,6 @@
 #endif
 
 float* pieniadze;
-int liczba_pytan_plik;
 
 void clearconsole(){
     #ifdef WINDOWS
@@ -68,7 +67,7 @@ Element* dodaj_do_listy(Element* head, Pytanie pytanie){
     return head;
 }
 
-Element* wczytaj_pytania(Element* head, char* nazwa_pliku){
+Element* wczytaj_pytania(Element* head, char* nazwa_pliku, int* liczba_pytan_plik){
     FILE *plik = fopen(nazwa_pliku, "r");
     if(plik == NULL){
         printf("Nie mozna otworzyc pliku z pytaniami");
@@ -103,7 +102,7 @@ Element* wczytaj_pytania(Element* head, char* nazwa_pliku){
         pytanie.poprawna_odpowiedz = (int)bufer[k] - 48;
 
         head = dodaj_do_listy(head, pytanie);
-        liczba_pytan_plik++;
+        *liczba_pytan_plik += 1;
     }
 
     free(bufer);
@@ -144,7 +143,7 @@ Element* usun_indeks(Element* head, int index){
     return head;
 }
 
-Element* losuj_pytania(Element* head){
+Element* losuj_pytania(Element* head, int liczba_pytan_plik){
     Element* new_head = NULL;
     srand(time(0));
     int rozmiar = liczba_pytan_plik;
@@ -400,6 +399,7 @@ void play(Element* head){
 
 int main(){
     clearconsole();
+    int liczba_pytan_plik = 0;
     char *nazwa_pliku = "lista_pytan.txt";
     Element* head = NULL;
     
@@ -414,8 +414,8 @@ int main(){
     }
 
     while(1){
-        head = wczytaj_pytania(head, nazwa_pliku);
-        head = losuj_pytania(head);
+        head = wczytaj_pytania(head, nazwa_pliku, &liczba_pytan_plik);
+        head = losuj_pytania(head, liczba_pytan_plik);
         printf("Witamy w grze milionerzy! ");
         printf("Wybierz opcje: \n");
         printf("1. Zagraj.\n");
