@@ -398,8 +398,30 @@ void komunikat_rezygnacja(Element* head){
     sleep(4);
 }
 
+void fifty_fifty(int poprawna){
+    srand(time(0));
+    int druga_odp = rand()%4+1;
+    while(druga_odp==poprawna){
+        druga_odp = rand()%4+1;
+    }
+    if(druga_odp>poprawna){
+        int pom = druga_odp;
+        druga_odp = poprawna;
+        poprawna = pom;
+    }
+    printf("Odrzucilem dwie niepoprawne odpowiedzi.\n");
+    printf("Poprawna odpowiedz to: \n");
+    char litera1 = druga_odp + 'a' - 1;
+    char litera2 = poprawna + 'a' - 1;
+    printf("%c lub %c\n",litera1, litera2);
+}
+
 void play(Element* head){
     Zasady_i_akceptacja_regulaminu();
+    int* ratunek = (int*)malloc(3*sizeof(int));
+    ratunek[0]=1;
+    ratunek[1]=1;
+    ratunek[2]=1;
     int wynik = -1;
     for(int i=0;i<12;i++){ 
         informacje_i_tresc_pytania(head,i);
@@ -428,6 +450,12 @@ void play(Element* head){
                     if(kolo<1 or kolo>3){
                         printf("Podaj liczbe z przedzialu 1-3.\n");
                     }
+                    if(!ratunek[kolo-1]){
+                        printf("Uzyles juz danego kola!");
+                    }
+                    if(kolo==2){
+                        fifty_fifty(head->pytanie.poprawna_odpowiedz);
+                    }
                 }
             }
             else if(decyzja==3){
@@ -444,6 +472,7 @@ void play(Element* head){
         }
         head = head -> next;
     }
+    free(ratunek);
 }
 
 int main(){
@@ -494,3 +523,5 @@ int main(){
     free(pieniadze);
     return 0;
 }
+// a b c d
+//
