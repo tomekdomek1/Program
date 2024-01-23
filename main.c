@@ -199,6 +199,12 @@ void dodaj_pytanie_do_pliku(char* nazwa_pliku, char* pytanie, char* odp1, char* 
     usun_znak(odp2, ':');
     usun_znak(odp3, ':');
     usun_znak(odp4, ':');
+
+    usun_znak(pytanie, '\n');
+    usun_znak(odp1, '\n');
+    usun_znak(odp2, '\n');
+    usun_znak(odp3, '\n');
+    usun_znak(odp4, '\n');
     
     FILE *plik = fopen(nazwa_pliku, "a");
     if(plik == NULL){
@@ -415,6 +421,29 @@ void fifty_fifty(int poprawna){
     printf("%c lub %c\n",litera1, litera2);
 }
 
+void kola_ratunkowe(Element* head, int** ratunek){
+    while((*ratunek[0]) + (*ratunek[1]) + (*ratunek[2]) != 0){
+        printf("Ktorego z kol chcesz uzyc? \n");
+        printf("1. Pytanie do Publicznosci\n");
+        printf("2. 50/50\n");
+        printf("3. Telefon do przyjaciela");
+        int kolo = -1;
+        while(kolo<1 or kolo>3){
+            kolo = safescanf();
+            if(kolo<1 or kolo>3){
+                printf("Podaj liczbe z przedzialu 1-3.\n");
+            }
+            if(!(*ratunek[kolo-1])){
+                printf("Uzyles juz danego kola!");
+            }
+            if(kolo==2){
+                fifty_fifty(head->pytanie.poprawna_odpowiedz);
+            }
+        }
+        *ratunek[kolo-1] = 0;
+    }
+}
+
 void play(Element* head){
     Zasady_i_akceptacja_regulaminu();
     int* ratunek = (int*)malloc(3*sizeof(int));
@@ -456,6 +485,7 @@ void play(Element* head){
                         fifty_fifty(head->pytanie.poprawna_odpowiedz);
                     }
                 }
+                //kola_ratunkowe(head, &ratunek);
             }
             else if(decyzja==3){
                 wynik = 2;
@@ -488,6 +518,7 @@ int main(){
         switch(wybor){
             case 1: 
                 //printf("%d\n",liczba_pytan_plik);
+                liczba_pytan_plik = 0;
                 head = wczytaj_pytania(head, nazwa_pliku, &liczba_pytan_plik);
                 head = losuj_pytania(head, liczba_pytan_plik);
                 //printf("%d\n",liczba_pytan_plik);
@@ -495,14 +526,45 @@ int main(){
                 play(head);
                 break;
             case 2:
-                printf("Tutaj dodamy pytanie.\n");
+                //ten getchar() jest wazny zeby pytanie_uzytkownika nie bylo samym enterem
+                getchar();
+                int max_rozmiar = 200;
+                char* pytanie_uzytkownika = malloc(sizeof(char) * max_rozmiar);
+                printf("Wpisz tresc pytania\n");
+                fgets(pytanie_uzytkownika, max_rozmiar, stdin);
+
+                char* odp1_uzytkownika = malloc(sizeof(char) * max_rozmiar/2);
+                printf("Wpisz tresc pierwszej odpowiedzi\n");
+                fgets(odp1_uzytkownika, max_rozmiar/2, stdin);
+                char* odp2_uzytkownika = malloc(sizeof(char) * max_rozmiar/2);
+                printf("Wpisz tresc drugiej odpowiedzi\n");
+                fgets(odp2_uzytkownika, max_rozmiar/2, stdin);
+                char* odp3_uzytkownika = malloc(sizeof(char) * max_rozmiar/2);
+                printf("Wpisz tresc trzeciej odpowiedzi\n");
+                fgets(odp3_uzytkownika, max_rozmiar/2, stdin);
+                char* odp4_uzytkownika = malloc(sizeof(char) * max_rozmiar/2);
+                printf("Wpisz tresc czwartej odpowiedzi\n");
+                fgets(odp4_uzytkownika, max_rozmiar/2, stdin);
+
+                // tutaj czytam inta w niebezpieczny sposob :)
+                int poprawna_uzytkownika = 0;
+                printf("Podaj numer poprawnej odpowiedzi [1 - 4]\n");
+                scanf("%d", &poprawna_uzytkownika);
+
+                dodaj_pytanie_do_pliku(nazwa_pliku, pytanie_uzytkownika, odp1_uzytkownika, odp2_uzytkownika, odp3_uzytkownika, odp4_uzytkownika, poprawna_uzytkownika);
+
+                free(pytanie_uzytkownika);
+                free(odp1_uzytkownika);
+                free(odp2_uzytkownika);
+                free(odp3_uzytkownika);
+                free(odp4_uzytkownika);
                 break;
             case 3:
                 przywroc_fabryczne_w_r(nazwa_pliku,nazwa_fabryczna);
                 clearconsole();
                 printf("Przywrocono ustawienia fabryczne.\n");
                 sleep(1);
-                printf("W puli znajduje sie teraz 19 pytan.\n");
+                printf("W puli znajduje sie teraz %d pytan.\n", liczba_pytan_plik);
                 break;
             case 4:
                 clearconsole();
