@@ -15,6 +15,7 @@
 #endif
 
 float* pieniadze;
+int liczba_pytan_plik;
 
 void clearconsole(){
     #ifdef WINDOWS
@@ -70,7 +71,7 @@ Element* dodaj_do_listy(Element* head, Pytanie pytanie){
 Element* wczytaj_pytania(Element* head, char* nazwa_pliku){
     FILE *plik = fopen(nazwa_pliku, "r");
     if(plik == NULL){
-        printf("Nie mozna otworzyc pliku");
+        printf("Nie mozna otworzyc pliku z pytaniami");
     }
     int max_rozmiar = 600;
     char *bufer = (char*)malloc(sizeof(char)*max_rozmiar);
@@ -102,6 +103,7 @@ Element* wczytaj_pytania(Element* head, char* nazwa_pliku){
         pytanie.poprawna_odpowiedz = (int)bufer[k] - 48;
 
         head = dodaj_do_listy(head, pytanie);
+        liczba_pytan_plik++;
     }
 
     free(bufer);
@@ -142,11 +144,10 @@ Element* usun_indeks(Element* head, int index){
     return head;
 }
 
-//zakladam ze znam rozmiar listy (19) - do pobierania z funkcji wczytujacej +1 po ewentualnym dodaniu pytania
 Element* losuj_pytania(Element* head){
     Element* new_head = NULL;
     srand(time(0));
-    int rozmiar = 19;
+    int rozmiar = liczba_pytan_plik;
     int liczba_pytan = 12;
     for(int i=0; i<liczba_pytan; i++){
         Element* temp = head;
@@ -158,6 +159,68 @@ Element* losuj_pytania(Element* head){
         head = usun_indeks(head, j);
     }
     return new_head;
+}
+
+void przywroc_fabryczne_w_r(char* nazwa_pliku, char* plik_fabryczny){
+    FILE *plik_nadpisywany = fopen(nazwa_pliku, "w");
+    if(plik_nadpisywany == NULL){
+        printf("Nie mozna otworzyc pliku z pytaniami");
+    }
+    FILE *plik = fopen(plik_fabryczny, "r");
+    if(plik == NULL){
+        printf("Nie mozna otworzyc pliku z pytaniami domyslnymi");
+    }
+
+    int max_rozmiar = 600;
+    char *bufer = (char*)malloc(sizeof(char)*max_rozmiar);
+    while(fgets(bufer, max_rozmiar, plik)){
+        fputs(bufer, plik_nadpisywany);
+    }
+
+    free(bufer);
+    fclose(plik);
+    fclose(plik_nadpisywany);
+}
+
+void usun_znak(char *str, char c) {
+    int i, j, len = strlen(str);
+    for (i=j=0; i<len; i++) {
+        if (str[i] != c) {
+            str[j++] = str[i];
+        }
+    }
+    str[j] = '\0';
+}
+
+void dodaj_pytanie_do_pliku(char* nazwa_pliku, char* pytanie, char* odp1, char* odp2, char* odp3, char* odp4, int poprawna){
+    usun_znak(pytanie, ':');
+    usun_znak(odp1, ':');
+    usun_znak(odp2, ':');
+    usun_znak(odp3, ':');
+    usun_znak(odp4, ':');
+    
+    FILE *plik = fopen(nazwa_pliku, "a");
+    if(plik == NULL){
+        printf("Nie mozna otworzyc pliku z pytaniami");
+    }
+    fputs("\n", plik);
+    fputs(pytanie, plik);
+    fputs(":", plik);
+    fputs(odp1, plik);
+    fputs(":", plik);
+    fputs(odp2, plik);
+    fputs(":", plik);
+    fputs(odp3, plik);
+    fputs(":", plik);
+    fputs(odp4, plik);
+    fputs(":", plik);
+
+    char* poprawna_str = malloc(sizeof(char)*2);
+    sprintf(poprawna_str, "%d", poprawna);
+    fputs(poprawna_str, plik);
+
+    free(poprawna_str);
+    fclose(plik);
 }
 
 void pisz_regulamin(){
