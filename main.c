@@ -2,14 +2,48 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 #define and &&
 #define or ||
+
+#if defined(_WIN32) || defined(_WIN64)
+    #define WINDOWS
+#elif defined(__unix__) || defined(__APPLE__) || defined(__linux__) || defined(__linux) || defined(linux) || defined(__unix)
+    #define UNIX
+#else
+    #define OTHER_OS
+#endif
+
+float* pieniadze;
+
+void clearconsole(){
+    #ifdef WINDOWS
+        system("cls");
+    #elif defined(UNIX)
+        printf("\033[1;1H\033[2J");
+    #endif
+}
 
 int safescanf() {
     int zmienna;
     while (scanf("%d", &zmienna) != 1) {
         printf("Błędne dane. Podaj liczbę ponownie: ");
         while (getchar() != '\n');
+    }
+    return zmienna;
+}
+
+int safecharscanf() {
+    char zmienna;
+    while (getchar() != '\n');
+    printf("\n");
+    while (scanf("%c", &zmienna) != 1) {
+        printf("Bledny format odpowiedzi. Podaj odpowiedz ponownie: ");
+        while (getchar() != '\n');
+    }
+    if(zmienna<'a' or zmienna>'d'){
+        printf("Nie ma takiej odpowiedzi. Podaj odpowiedz ponownie: ");
+        zmienna = safecharscanf();
     }
     return zmienna;
 }
@@ -26,7 +60,7 @@ typedef struct Element{
 } Element;
 
 Element* dodaj_do_listy(Element* head, Pytanie pytanie){
-    Element* nowy = malloc(sizeof(Element));
+    Element* nowy = (Element*)malloc(sizeof(Element));
     nowy -> pytanie = pytanie;
     nowy -> next = head;
     head = nowy;
@@ -39,7 +73,7 @@ Element* wczytaj_pytania(Element* head, char* nazwa_pliku){
         printf("Nie mozna otworzyc pliku");
     }
     int max_rozmiar = 600;
-    char *bufer = malloc(sizeof(char)*max_rozmiar);
+    char *bufer = (char*)malloc(sizeof(char)*max_rozmiar);
     
     //biore linie, tworze na jej podstawie pytanie, dodaje pytanie do listy
     while(fgets(bufer, max_rozmiar, plik)){
@@ -125,36 +159,201 @@ Element* losuj_pytania(Element* head){
     }
     return new_head;
 }
-void play(){
+
+void pisz_regulamin(){
+    printf("Przed Toba bedzie 12 pytan. \n");
+    printf("Po kazdym pytaniu wyswietla Ci sie 4 odpowiedzi, Twoim zadaniem bedzie zaznaczyc poprawna odpowiedz.\n");
+    printf("By ulatwic Ci zostanie milionerem, do dyspozycji bedziesz mial 3 kola ratunkowe:\n");
+    printf("Pytanie do publicznosci, 50/50 oraz Telefon do przyjaciela. Kazdego z kol mozna uczyc tylko raz.\n");
+    sleep(2);
+    printf("Czy zasady gry sa zrozumiale? Tak - 1 / Nie - 0\n");
+    printf(":");
+}
+
+void pisz_regulamin_extended(){
+    printf("Przed Toba bedzie 12 pytan. \n");
+    printf("Po kazdym pytaniu wyswietla Ci sie 4 odpowiedzi od a do d.\n");
+    printf("Jezeli uznasz, ze nie jestes w stanie na to pytanie odpowiedziec, bedziesz mial 3 rozne kola ratunkowe.\n");
+    sleep(6);
+    clearconsole();
+    printf("Kolo ratunkowe nr 1: Pytanie do publicznosci.\n");
+    printf("To kolo przedstawi Ci ile ludzi z widowni zaznaczyloby poszczegolne odpowiedzi\n\n");
+    printf("Kolo ratunkowe nr 2: 50/50\n");
+    printf("Uzycie tego kola spowoduje losowe odrzucenie dwoch niepoprawnych odpowiedzi.\n\n");
+    printf("Kolo ratunkowe nr 3: Telefon do przyjaciela\n");
+    printf("To kolo wskaze Ci odpowiedz, ktora na Twoim miejscu zaznaczylby Twoj przyjaciel.\n\n");
+    printf("Pamietaj, kazdego kola bedzie mozna uzyc tylko raz!\n");
+    sleep(7);
+    clearconsole();
+    printf("UWAGA!\nPrzed zaznaczeniem odpowiedzi dokladnie sie zastanow!\nGdy odpowiedz bedzie niepoprawna stracisz cala wygrana!\n\n");
+    printf("Jezeli zrezygnujesz z udzielenia odpowiedzi, zabierzesz aktualna wygrana do domu.\n");
+    sleep(5);
+    clearconsole();
+    printf("To sa pieniadze, ktore mozesz wygrac odpowiadajac poprawnie na kolejne pytania: \n");
+    for(int i=1;i<13;i++){
+        printf("Pytanie nr %d, do wygrania: %d zl.\n",i,(int)pieniadze[i]);
+    }
+    sleep(5);
+    clearconsole();
+    printf("Czy zasady gry sa zrozumiale? Tak - 1 / Nie - 0\n");
+    printf(":");
+}
+
+void Zasady_i_akceptacja_regulaminu(){
+    clearconsole();
     int test=0;
+    int odp=-1;
     while(!test){
-        printf("Przed Toba bedzie 12 pytan. \n");
-        printf("Po kazdym pytaniu wyswietla Ci sie 4 odpowiedzi, Twoim zadaniem bedzie zaznaczyc poprawna odpowiedz.\n");
-        printf("By ulatwic Ci zostanie milionerem, do dyspozycji bedziesz mial 3 kola ratunkowe:\n");
-        printf("Pytanie do publicznosci, 50/50 oraz Telefon do przyjaciela. Kazdego z kol mozna uczyc tylko raz.\n");
-        printf("Czy zasady gry sa zrozumiale? Tak - 1 / Nie - 0\n");
-        printf(":");
-        int odp;
+        if(odp==-1){
+            pisz_regulamin();
+        }
+        if(odp==0){
+            pisz_regulamin_extended();
+        }
         odp = safescanf();
         if(odp==1){
+            clearconsole();
             test=1;
+            printf("\nZatem zacznijmy gre!\n\n");
         }
         else if(odp!=0 and odp!=1){
+            clearconsole();
             printf("\nNie ma takiej opcji do wyboru, wyswietle zasady jeszcze raz.\n\n");
         }
         else{
-            printf("\nZatem powtorze zasady: \n\n");
+            clearconsole();
+            printf("Zatem postaram sie jeszcze raz wytlumaczyc zasady: \n\n");
         }
     }
-    printf("\nZatem zacznijmy gre!\n\n");
 }
 
+float mnoznik(int liczba){
+    if(liczba == 4 )
+        return 2.5;
+    if(liczba == 8)
+        return 1.875;
+    return 2.0;
+}
+
+void pisz_decyzja_gra(){
+    printf("Wybierz jedno: \n");
+        printf("1. Chce zaznaczyc odpowiedz.\n");
+        printf("2. Chce uzyc kola ratunkowego.\n");
+        printf("3. Chce zrezygnowac z dalszej gry.\n");
+}
+
+void czy_przegrano(int wartosc, int runda){
+    clearconsole();
+    if(wartosc==1){
+        printf("Bardzo nam przykro.\n");
+        printf("Odchodzisz z niczym :(\n");
+    }
+    if(wartosc==2){
+        if(runda!=0)
+            printf("Mimo wszystko, gratulujemy, bo wygrales wlasnie: %d zl!\n",(int)pieniadze[runda]);
+        if(runda==0){
+            printf("Niestety, ale nic nie wygrales\n");
+            printf("Mogles chociaz sprobowac, nastepnym razem sie uda!\n");
+        }
+    }
+    sleep(3);
+    clearconsole();
+    
+}
+
+void play(Element* head){
+    Zasady_i_akceptacja_regulaminu();
+    int wynik = 0;
+    for(int i=0;i<12;i++){ 
+        printf("Pytanie nr %d: \n",i+1);
+        printf("Teraz bedziesz walczyc o %d zl.\n",(int)pieniadze[i+1]);
+        printf("%s\n\n",head->pytanie.tresc_pytania);
+        printf("Tak prezentuja sie odpowiedzi:\n\n");
+        for(int i=0;i<4;i++){
+            printf("Odpowiedz %c: %s\n",'a'+i,head->pytanie.mozliwe_odpowiedzi[i]);
+        }
+        printf("\n");
+        int decyzja = -1;
+        while(decyzja!=1 and decyzja!=2 and decyzja!=3){
+            pisz_decyzja_gra();
+            decyzja = safescanf();
+            if(decyzja==1){
+                printf("Podaj jedna z odpowiedzi a-d");
+                char odpowiedz = safecharscanf();
+                int check = (int)odpowiedz - 'a' + 1;
+                if(check==head->pytanie.poprawna_odpowiedz){
+                    wynik = 0;
+                    clearconsole();
+                    printf("Gratulacje, to poprawna odpowiedz!\n");
+                    printf("Twoja obecna wygrana wynosi: %d zl\n",(int)pieniadze[i+1]);
+                    printf("Przechodzimy do pytania nr %d\n",i+2);
+                    sleep(4);
+                    clearconsole();
+                }
+                else{
+                    wynik=1;
+                    clearconsole();
+                    printf("Niestety, ale to nie jest poprawna odpowiedz.\n");
+                    printf("Poprawnie nalezalo zaznaczyc odpowiedz: %c\n",head->pytanie.poprawna_odpowiedz+'a'-1);
+                    printf("%s\n",head->pytanie.mozliwe_odpowiedzi[head->pytanie.poprawna_odpowiedz - 1]);
+                    sleep(4);
+                    clearconsole();
+                }
+            }
+            else if(decyzja==2){
+                printf("Ktorego z kol chcesz uzyc? \n");
+                printf("1. Pytanie do Publicznosci\n");
+                printf("2. 50/50\n");
+                printf("3. Telefon do przyjaciela");
+                int kolo = -1;
+                while(kolo<1 or kolo>3){
+                    kolo = safescanf();
+                    if(kolo<1 or kolo>3){
+                        printf("Podaj liczbe z przedzialu 1-3.\n");
+                    }
+                }
+            }
+            else if(decyzja==3){
+                clearconsole();
+                printf("Szkoda, ze zrezygnowales z dalszej rozgrywki.\n");
+                printf("Poprawnie nalezalo zaznaczyc odpowiedz: %c\n",head->pytanie.poprawna_odpowiedz+'a'-1);
+                printf("%s\n",head->pytanie.mozliwe_odpowiedzi[head->pytanie.poprawna_odpowiedz - 1]);
+                sleep(4);
+                wynik = 2;
+            }
+            else{
+                printf("Podaj liczbe z przedzialu 1-3.\n");
+            }
+        }
+        if(wynik){
+            czy_przegrano(wynik,i);
+            break;
+        }
+        head = head -> next;
+        sleep(1);
+        clearconsole();
+    }
+}
 
 int main(){
+    clearconsole();
     char *nazwa_pliku = "lista_pytan.txt";
     Element* head = NULL;
+    
+    pieniadze = (float*)malloc(sizeof(char)*13);
+    pieniadze[0]=0.0;
+    pieniadze[1]=500.0;
+    pieniadze[9]=125000.0;
+    for(int i=2;i<13;i++){
+        if(i==9) continue;
+        //printf("%f \n",mnoznik(i));
+        pieniadze[i]=pieniadze[i-1]*mnoznik(i);
+    }
+
     while(1){
-        printf("Witamy w grze milionerzy!");
+        head = wczytaj_pytania(head, nazwa_pliku);
+        head = losuj_pytania(head);
+        printf("Witamy w grze milionerzy! ");
         printf("Wybierz opcje: \n");
         printf("1. Zagraj.\n");
         printf("2. Dodaj pytanie.\n");
@@ -165,7 +364,7 @@ int main(){
         switch(wybor){
             case 1: 
                 printf("Rozpocznijmy gre!\n");
-                play();
+                play(head);
                 break;
             case 2:
                 printf("Tutaj dodamy pytanie.\n");
@@ -174,24 +373,21 @@ int main(){
                 printf("Tutaj przywrocimy ustawienia domyslne.\n");
                 break;
             case 4:
+                clearconsole();
+                printf("Do zobaczenia!");
                 return 0;
                 break;
             default:
                 printf("Nie ma takiej opcji! Sprobuj jeszcze raz!\n");
                 break;
         }
-    
-    }
-    
-    
+    }  
 
-    head = wczytaj_pytania(head, nazwa_pliku);
-    head = losuj_pytania(head);
     //fajnie byloby losuj_pytania zapisac do innej zmiennej, zeby nie zgubic heada i zwolnic pamiec
     //head = losuj_pytania(head);
     //wypisz_liste(head);
     //head = usun_indeks(head, 0);
     //wypisz_liste(head);
-
+    free(pieniadze);
     return 0;
 }
