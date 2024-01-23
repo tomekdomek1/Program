@@ -8,8 +8,10 @@
 
 #if defined(_WIN32) || defined(_WIN64)
     #define WINDOWS
-#elif defined(__unix__) || defined(__APPLE__) || defined(__linux__) || defined(__linux) || defined(linux) || defined(__unix)
-    #define UNIX
+#elif defined(_linux_) || defined(linux)
+    #define LINUX
+#elif defined(__APPLE__) || defined(_APPLE_) || defined(__MACH__)
+    #define MACOS
 #else
     #define OTHER_OS
 #endif
@@ -20,7 +22,7 @@ int liczba_pytan_plik;
 void clearconsole(){
     #ifdef WINDOWS
         system("cls");
-    #elif defined(UNIX)
+    #elif defined(LINUX) || defined(MACOS)
         printf("\033[1;1H\033[2J");
     #endif
 }
@@ -103,7 +105,7 @@ Element* wczytaj_pytania(Element* head, char* nazwa_pliku){
         pytanie.poprawna_odpowiedz = (int)bufer[k] - 48;
 
         head = dodaj_do_listy(head, pytanie);
-        liczba_pytan_plik++;
+        //liczba_pytan_plik++;
     }
 
     free(bufer);
@@ -147,7 +149,7 @@ Element* usun_indeks(Element* head, int index){
 Element* losuj_pytania(Element* head){
     Element* new_head = NULL;
     srand(time(0));
-    int rozmiar = liczba_pytan_plik;
+    int rozmiar = 19;
     int liczba_pytan = 12;
     for(int i=0; i<liczba_pytan; i++){
         Element* temp = head;
@@ -324,43 +326,95 @@ void czy_przegrano(int wartosc, int runda){
     
 }
 
+void informacje_i_tresc_pytania(Element* head, int i){
+    printf("Pytanie nr %d: \n",i+1);
+    printf("Teraz bedziesz walczyc o %d zl.\n",(int)pieniadze[i+1]);
+    printf("%s\n\n",head->pytanie.tresc_pytania);
+    printf("Tak prezentuja sie odpowiedzi:\n\n");
+    for(int i=0;i<4;i++){
+        printf("Odpowiedz %c: %s\n",'a'+i,head->pytanie.mozliwe_odpowiedzi[i]);
+    }
+    printf("\n");
+}
+
+void wyswietl_menu(){
+    printf("Witamy w grze milionerzy! ");
+    printf("Wybierz opcje: \n");
+    printf("1. Zagraj.\n");
+    printf("2. Dodaj pytanie.\n");
+    printf("3. Przywroc domyslne.\n");
+    printf("4. Wyjdz.\n");
+}
+
+void generuj_pieniadze(){
+    pieniadze = (float*)malloc(sizeof(char)*13);
+    pieniadze[0]=0.0;
+    pieniadze[1]=500.0;
+    pieniadze[9]=125000.0;
+    for(int i=2;i<13;i++){
+        if(i==9) continue;
+        //printf("%f \n",mnoznik(i));
+        pieniadze[i]=pieniadze[i-1]*mnoznik(i);
+    }
+}
+
+int wczytaj_i_sprawdz_odpowiedz(Element* head){
+    char odpowiedz = safecharscanf();
+    int check = (int)odpowiedz - 'a' + 1;
+    if(check==head->pytanie.poprawna_odpowiedz)
+        return 1;
+    else
+        return 0;
+}
+
+void odpowiedni_komunikat_po_rundzie(int wynik,int i){
+    if(wynik){
+        czy_przegrano(wynik,i);
+    }
+    else if(!wynik){
+        clearconsole();
+        printf("Gratulacje, to poprawna odpowiedz!\n");
+        printf("Twoja obecna wygrana wynosi: %d zl\n",(int)pieniadze[i+1]);
+        printf("Przechodzimy do pytania nr %d\n",i+2);
+        sleep(4);
+        clearconsole();
+    }
+}
+
+void komunikat_zla_odp(Element* head){
+    clearconsole();
+    printf("Niestety, ale to nie jest poprawna odpowiedz.\n");
+    printf("Poprawnie nalezalo zaznaczyc odpowiedz: %c\n",head->pytanie.poprawna_odpowiedz+'a'-1);
+    printf("%s\n",head->pytanie.mozliwe_odpowiedzi[head->pytanie.poprawna_odpowiedz - 1]);
+    sleep(4);
+    clearconsole();
+}
+
+void komunikat_rezygnacja(Element* head){
+    clearconsole();
+    printf("Szkoda, ze zrezygnowales z dalszej rozgrywki.\n");
+    printf("Poprawnie nalezalo zaznaczyc odpowiedz: %c\n",head->pytanie.poprawna_odpowiedz+'a'-1);
+    printf("%s\n",head->pytanie.mozliwe_odpowiedzi[head->pytanie.poprawna_odpowiedz - 1]);
+    sleep(4);
+}
+
 void play(Element* head){
     Zasady_i_akceptacja_regulaminu();
-    int wynik = 0;
+    int wynik = -1;
     for(int i=0;i<12;i++){ 
-        printf("Pytanie nr %d: \n",i+1);
-        printf("Teraz bedziesz walczyc o %d zl.\n",(int)pieniadze[i+1]);
-        printf("%s\n\n",head->pytanie.tresc_pytania);
-        printf("Tak prezentuja sie odpowiedzi:\n\n");
-        for(int i=0;i<4;i++){
-            printf("Odpowiedz %c: %s\n",'a'+i,head->pytanie.mozliwe_odpowiedzi[i]);
-        }
-        printf("\n");
+        informacje_i_tresc_pytania(head,i);
         int decyzja = -1;
         while(decyzja!=1 and decyzja!=2 and decyzja!=3){
             pisz_decyzja_gra();
             decyzja = safescanf();
             if(decyzja==1){
                 printf("Podaj jedna z odpowiedzi a-d");
-                char odpowiedz = safecharscanf();
-                int check = (int)odpowiedz - 'a' + 1;
-                if(check==head->pytanie.poprawna_odpowiedz){
+                if(wczytaj_i_sprawdz_odpowiedz(head)){
                     wynik = 0;
-                    clearconsole();
-                    printf("Gratulacje, to poprawna odpowiedz!\n");
-                    printf("Twoja obecna wygrana wynosi: %d zl\n",(int)pieniadze[i+1]);
-                    printf("Przechodzimy do pytania nr %d\n",i+2);
-                    sleep(4);
-                    clearconsole();
                 }
                 else{
                     wynik=1;
-                    clearconsole();
-                    printf("Niestety, ale to nie jest poprawna odpowiedz.\n");
-                    printf("Poprawnie nalezalo zaznaczyc odpowiedz: %c\n",head->pytanie.poprawna_odpowiedz+'a'-1);
-                    printf("%s\n",head->pytanie.mozliwe_odpowiedzi[head->pytanie.poprawna_odpowiedz - 1]);
-                    sleep(4);
-                    clearconsole();
+                    komunikat_zla_odp(head);
                 }
             }
             else if(decyzja==2){
@@ -377,55 +431,37 @@ void play(Element* head){
                 }
             }
             else if(decyzja==3){
-                clearconsole();
-                printf("Szkoda, ze zrezygnowales z dalszej rozgrywki.\n");
-                printf("Poprawnie nalezalo zaznaczyc odpowiedz: %c\n",head->pytanie.poprawna_odpowiedz+'a'-1);
-                printf("%s\n",head->pytanie.mozliwe_odpowiedzi[head->pytanie.poprawna_odpowiedz - 1]);
-                sleep(4);
                 wynik = 2;
+                komunikat_rezygnacja(head);
             }
             else{
                 printf("Podaj liczbe z przedzialu 1-3.\n");
             }
         }
+        odpowiedni_komunikat_po_rundzie(wynik,i);
         if(wynik){
-            czy_przegrano(wynik,i);
             break;
         }
         head = head -> next;
-        sleep(1);
-        clearconsole();
     }
 }
 
 int main(){
     clearconsole();
     char *nazwa_pliku = "lista_pytan.txt";
+    char *nazwa_fabryczna = "lista_fabryczna.txt";
     Element* head = NULL;
-    
-    pieniadze = (float*)malloc(sizeof(char)*13);
-    pieniadze[0]=0.0;
-    pieniadze[1]=500.0;
-    pieniadze[9]=125000.0;
-    for(int i=2;i<13;i++){
-        if(i==9) continue;
-        //printf("%f \n",mnoznik(i));
-        pieniadze[i]=pieniadze[i-1]*mnoznik(i);
-    }
-
+    generuj_pieniadze();
     while(1){
-        head = wczytaj_pytania(head, nazwa_pliku);
-        head = losuj_pytania(head);
-        printf("Witamy w grze milionerzy! ");
-        printf("Wybierz opcje: \n");
-        printf("1. Zagraj.\n");
-        printf("2. Dodaj pytanie.\n");
-        printf("3. Przywroc domyslne.\n");
-        printf("4. Wyjdz.\n");
+        wyswietl_menu();
         int wybor;
         wybor = safescanf();
         switch(wybor){
             case 1: 
+                //printf("%d\n",liczba_pytan_plik);
+                head = wczytaj_pytania(head, nazwa_pliku);
+                head = losuj_pytania(head);
+                //printf("%d\n",liczba_pytan_plik);
                 printf("Rozpocznijmy gre!\n");
                 play(head);
                 break;
@@ -433,7 +469,11 @@ int main(){
                 printf("Tutaj dodamy pytanie.\n");
                 break;
             case 3:
-                printf("Tutaj przywrocimy ustawienia domyslne.\n");
+                przywroc_fabryczne_w_r(nazwa_pliku,nazwa_fabryczna);
+                clearconsole();
+                printf("Przywrocono ustawienia fabryczne.\n");
+                sleep(1);
+                printf("W puli znajduje sie teraz 19 pytan.\n");
                 break;
             case 4:
                 clearconsole();
