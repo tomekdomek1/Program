@@ -403,7 +403,12 @@ void komunikat_rezygnacja(Element* head){
     sleep(4);
 }
 
-void fifty_fifty(int poprawna){
+typedef struct pair{
+    int odp1;
+    int odp2;
+} pair;
+
+pair fifty_fifty(int poprawna, Element* head){
     srand(time(0));
     int druga_odp = rand()%4+1;
     while(druga_odp==poprawna){
@@ -414,33 +419,118 @@ void fifty_fifty(int poprawna){
         druga_odp = poprawna;
         poprawna = pom;
     }
+    clearconsole();
+    printf("Pytanie  brzmialo:\n");
+    printf("%s\n",head->pytanie.tresc_pytania);
     printf("Odrzucilem dwie niepoprawne odpowiedzi.\n");
-    printf("Poprawna odpowiedz to: \n");
+    printf("Jedna z poprawnych odpowiedzi to: \n");
     char litera1 = druga_odp + 'a' - 1;
     char litera2 = poprawna + 'a' - 1;
-    printf("%c lub %c\n",litera1, litera2);
+    printf("%c - %s\nlub\n%c - %s\n",litera1, head->pytanie.mozliwe_odpowiedzi[druga_odp-1], litera2,head->pytanie.mozliwe_odpowiedzi[poprawna-1]);
+    
+    pair X;
+    X.odp1 = druga_odp-1;
+    X.odp2 = poprawna-1;
+    return X;
 }
 
-void kola_ratunkowe(Element* head, int** ratunek){
-    while((*ratunek[0]) + (*ratunek[1]) + (*ratunek[2]) != 0){
+void kola_ratunkowe(Element* head, int** ratunek, int* wynik){
+    int kolo;
+    int decyzja2 = -1;
+    int liczba_dostepnych_kol = ((*ratunek)[0]) + ((*ratunek)[1]) + ((*ratunek)[2]);
+    pair wylos_odp;
+    wylos_odp.odp1=-1;
+    wylos_odp.odp2=-1;
+    
+    if(liczba_dostepnych_kol == 0){
+        printf("\nWykorzystales wszystkie kola ratunkowe\n");
+        printf("Wybierz '1' by zaznaczyc odpowiedz.\n");
+        printf("Wybierz inna cyfre by zrezygnowac z dalszej gry.\n");
+        decyzja2=safescanf();
+        if(decyzja2==1){
+            printf("Podaj jedna z odpowiedzi a-d");
+            if(wczytaj_i_sprawdz_odpowiedz(head)){
+                *wynik = 0;
+            }
+            else{
+                *wynik = 1;
+                komunikat_zla_odp(head);
+            }
+        }
+        else{
+            *wynik = 2;
+        }
+    }
+    while(liczba_dostepnych_kol != 0){
         printf("Ktorego z kol chcesz uzyc? \n");
         printf("1. Pytanie do Publicznosci\n");
         printf("2. 50/50\n");
-        printf("3. Telefon do przyjaciela");
-        int kolo = -1;
+        printf("3. Telefon do przyjaciela\n");
+        kolo = -1;
         while(kolo<1 or kolo>3){
+            printf("Wybierz [1-3]");
             kolo = safescanf();
             if(kolo<1 or kolo>3){
                 printf("Podaj liczbe z przedzialu 1-3.\n");
             }
-            if(!(*ratunek[kolo-1])){
-                printf("Uzyles juz danego kola!");
+            if((*ratunek)[kolo-1] == 0){
+                printf("Uzyles juz danego kola!\n");
+                break;
+            }
+            if(kolo==1){
+                // UZUPELNIC
+                printf("Pytanie do publicznosci\n");
             }
             if(kolo==2){
-                fifty_fifty(head->pytanie.poprawna_odpowiedz);
+                wylos_odp = fifty_fifty(head->pytanie.poprawna_odpowiedz,head);
+            }
+            if(kolo==3){
+                // UZUPELNIC
+                printf("Telefon do przyjaciela\n");
             }
         }
-        *ratunek[kolo-1] = 0;
+        (*ratunek)[kolo-1] = 0;
+        liczba_dostepnych_kol = ((*ratunek)[0]) + ((*ratunek)[1]) + ((*ratunek)[2]);
+        if(liczba_dostepnych_kol == 0){
+            printf("\nWykorzystales wszystkie kola ratunkowe\n");
+            printf("Wybierz '1' by zaznaczyc odpowiedz.\n");
+            printf("Wybierz inna cyfre by zrezygnowac z dalszej gry.\n");
+            decyzja2=safescanf();
+            if(decyzja2==1){
+                printf("Podaj jedna z odpowiedzi a-d");
+                if(wczytaj_i_sprawdz_odpowiedz(head)){
+                    *wynik = 0;
+                }
+                else{
+                    *wynik = 1;
+                    komunikat_zla_odp(head);
+                }
+            }
+            else{
+                *wynik = 2;
+            }
+            break;
+        }
+        
+        printf("Wybierz '1' by zaznaczyc odpowiedz.\n");
+        printf("Wybierz '2' by zrezygnowac z dalszej gry.\n");
+        printf("Wybierz inna cyfre aby przejsc do menu wyboru kolejego kola.\n");
+        decyzja2=safescanf();
+        if(decyzja2==1){
+            printf("Podaj jedna z odpowiedzi a-d");
+            if(wczytaj_i_sprawdz_odpowiedz(head)){
+                *wynik = 0;
+            }
+            else{
+                *wynik = 1;
+                komunikat_zla_odp(head);
+            }
+            break;
+        }
+        else if(decyzja2==2){
+            *wynik = 2;
+            break;
+        }
     }
 }
 
@@ -468,24 +558,31 @@ void play(Element* head){
                 }
             }
             else if(decyzja==2){
-                printf("Ktorego z kol chcesz uzyc? \n");
-                printf("1. Pytanie do Publicznosci\n");
-                printf("2. 50/50\n");
-                printf("3. Telefon do przyjaciela");
-                int kolo = -1;
-                while(kolo<1 or kolo>3){
-                    kolo = safescanf();
-                    if(kolo<1 or kolo>3){
-                        printf("Podaj liczbe z przedzialu 1-3.\n");
-                    }
-                    if(!ratunek[kolo-1]){
-                        printf("Uzyles juz danego kola!");
-                    }
-                    if(kolo==2){
-                        fifty_fifty(head->pytanie.poprawna_odpowiedz);
-                    }
+                /*if(ratunek[1]){
+                    fifty_fifty(head->pytanie.poprawna_odpowiedz); 
+                    ratunek[1]=0;                
                 }
-                //kola_ratunkowe(head, &ratunek);
+                else{
+                    printf("Wykorzystales to kolo ratunkowe!\n");
+                }
+                printf("Chce:\n");
+                printf("Wybierz '1' by zaznaczyc odpowiedz.\n");
+                printf("Wybierz inna liczbe by zrezygnowac z dalszej gry.\n");
+                int decyzja2=safescanf();
+                if(decyzja2==1){
+                    printf("Podaj jedna z odpowiedzi a-d");
+                    if(wczytaj_i_sprawdz_odpowiedz(head)){
+                        wynik = 0;
+                    }
+                    else{
+                        wynik = 1;
+                        komunikat_zla_odp(head);
+                    }                   
+                }
+                else{
+                    wynik = 2;
+                } */
+                kola_ratunkowe(head, &ratunek, &wynik);
             }
             else if(decyzja==3){
                 wynik = 2;
