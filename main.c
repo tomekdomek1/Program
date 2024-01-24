@@ -245,7 +245,7 @@ void pisz_regulamin_extended(){
     printf("Po kazdym pytaniu wyswietla Ci sie 4 odpowiedzi od a do d.\n");
     printf("Jezeli uznasz, ze nie jestes w stanie na to pytanie odpowiedziec, bedziesz mial 3 rozne kola ratunkowe.\n");
     sleep(6);
-    clearconsole();
+    //clearconsole();
     printf("Kolo ratunkowe nr 1: Pytanie do publicznosci.\n");
     printf("To kolo przedstawi Ci ile ludzi z widowni zaznaczyloby poszczegolne odpowiedzi\n\n");
     printf("Kolo ratunkowe nr 2: 50/50\n");
@@ -254,23 +254,23 @@ void pisz_regulamin_extended(){
     printf("To kolo wskaze Ci odpowiedz, ktora na Twoim miejscu zaznaczylby Twoj przyjaciel.\n\n");
     printf("Pamietaj, kazdego kola bedzie mozna uzyc tylko raz!\n");
     sleep(7);
-    clearconsole();
+    //clearconsole();
     printf("UWAGA!\nPrzed zaznaczeniem odpowiedzi dokladnie sie zastanow!\nGdy odpowiedz bedzie niepoprawna stracisz cala wygrana!\n\n");
     printf("Jezeli zrezygnujesz z udzielenia odpowiedzi, zabierzesz aktualna wygrana do domu.\n");
     sleep(5);
-    clearconsole();
+    //clearconsole();
     printf("To sa pieniadze, ktore mozesz wygrac odpowiadajac poprawnie na kolejne pytania: \n");
     for(int i=1;i<13;i++){
         printf("Pytanie nr %d, do wygrania: %d zl.\n",i,(int)pieniadze[i]);
     }
     sleep(5);
-    clearconsole();
+    //clearconsole();
     printf("Czy zasady gry sa zrozumiale? Tak - 1 / Nie - 0\n");
     printf(":");
 }
 
 void Zasady_i_akceptacja_regulaminu(){
-    clearconsole();
+    //clearconsole();
     int test=0;
     int odp=-1;
     while(!test){
@@ -282,16 +282,16 @@ void Zasady_i_akceptacja_regulaminu(){
         }
         odp = safescanf();
         if(odp==1){
-            clearconsole();
+            //clearconsole();
             test=1;
             printf("\nZatem zacznijmy gre!\n\n");
         }
         else if(odp!=0 and odp!=1){
-            clearconsole();
+            //clearconsole();
             printf("\nNie ma takiej opcji do wyboru, wyswietle zasady jeszcze raz.\n\n");
         }
         else{
-            clearconsole();
+            //clearconsole();
             printf("Zatem postaram sie jeszcze raz wytlumaczyc zasady: \n\n");
         }
     }
@@ -313,7 +313,7 @@ void pisz_decyzja_gra(){
 }
 
 void czy_przegrano(int wartosc, int runda){
-    clearconsole();
+    //clearconsole();
     if(wartosc==1){
         printf("Bardzo nam przykro.\n");
         printf("Odchodzisz z niczym :(\n");
@@ -327,7 +327,7 @@ void czy_przegrano(int wartosc, int runda){
         }
     }
     sleep(3);
-    clearconsole();
+    //clearconsole();
     
 }
 
@@ -377,33 +377,33 @@ void odpowiedni_komunikat_po_rundzie(int wynik,int i){
         czy_przegrano(wynik,i);
     }
     else if(!wynik){
-        clearconsole();
+        //clearconsole();
         printf("Gratulacje, to poprawna odpowiedz!\n");
         printf("Twoja obecna wygrana wynosi: %d zl\n",(int)pieniadze[i+1]);
         printf("Przechodzimy do pytania nr %d\n",i+2);
         sleep(4);
-        clearconsole();
+        //clearconsole();
     }
 }
 
 void komunikat_zla_odp(Element* head){
-    clearconsole();
+    //clearconsole();
     printf("Niestety, ale to nie jest poprawna odpowiedz.\n");
     printf("Poprawnie nalezalo zaznaczyc odpowiedz: %c\n",head->pytanie.poprawna_odpowiedz+'a'-1);
     printf("%s\n",head->pytanie.mozliwe_odpowiedzi[head->pytanie.poprawna_odpowiedz - 1]);
     sleep(4);
-    clearconsole();
+    //clearconsole();
 }
 
 void komunikat_rezygnacja(Element* head){
-    clearconsole();
+    //clearconsole();
     printf("Szkoda, ze zrezygnowales z dalszej rozgrywki.\n");
     printf("Poprawnie nalezalo zaznaczyc odpowiedz: %c\n",head->pytanie.poprawna_odpowiedz+'a'-1);
     printf("%s\n",head->pytanie.mozliwe_odpowiedzi[head->pytanie.poprawna_odpowiedz - 1]);
     sleep(4);
 }
 
-void fifty_fifty(int poprawna){
+void fifty_fifty(int poprawna, Element* head){
     srand(time(0));
     int druga_odp = rand()%4+1;
     while(druga_odp==poprawna){
@@ -414,33 +414,110 @@ void fifty_fifty(int poprawna){
         druga_odp = poprawna;
         poprawna = pom;
     }
+    //clearconsole();
+    printf("Pytanie  brzmialo:\n");
+    printf("%s\n",head->pytanie.tresc_pytania);
     printf("Odrzucilem dwie niepoprawne odpowiedzi.\n");
-    printf("Poprawna odpowiedz to: \n");
+    printf("Jedna z poprawnych odpowiedzi to: \n");
     char litera1 = druga_odp + 'a' - 1;
     char litera2 = poprawna + 'a' - 1;
-    printf("%c lub %c\n",litera1, litera2);
+    printf("%c - %s\nlub\n%c - %s\n",litera1, head->pytanie.mozliwe_odpowiedzi[druga_odp-1], litera2,head->pytanie.mozliwe_odpowiedzi[poprawna-1]);
 }
 
-void kola_ratunkowe(Element* head, int** ratunek){
-    while((*ratunek[0]) + (*ratunek[1]) + (*ratunek[2]) != 0){
+void kola_ratunkowe(Element* head, int** ratunek, int* wynik){
+    
+    int kolo;
+    int decyzja2 = -1;
+    int liczba_dostepnych_kol = ((*ratunek)[0]) + ((*ratunek)[1]) + ((*ratunek)[2]);
+    if(liczba_dostepnych_kol == 0){
+        printf("\nWykorzystales wszystkie kola ratunkowe\n");
+        printf("Wybierz '1' by zaznaczyc odpowiedz.\n");
+        printf("Wybierz inna cyfre by zrezygnowac z dalszej gry.\n");
+        decyzja2=safescanf();
+        if(decyzja2==1){
+            printf("Podaj jedna z odpowiedzi a-d");
+            if(wczytaj_i_sprawdz_odpowiedz(head)){
+                *wynik = 0;
+            }
+            else{
+                *wynik = 1;
+                komunikat_zla_odp(head);
+            }
+        }
+        else{
+            *wynik = 2;
+        }
+    }
+    while(liczba_dostepnych_kol != 0){
         printf("Ktorego z kol chcesz uzyc? \n");
         printf("1. Pytanie do Publicznosci\n");
         printf("2. 50/50\n");
-        printf("3. Telefon do przyjaciela");
-        int kolo = -1;
+        printf("3. Telefon do przyjaciela\n");
+        kolo = -1;
         while(kolo<1 or kolo>3){
+            printf("Wybierz [1-3]");
             kolo = safescanf();
             if(kolo<1 or kolo>3){
                 printf("Podaj liczbe z przedzialu 1-3.\n");
             }
-            if(!(*ratunek[kolo-1])){
-                printf("Uzyles juz danego kola!");
+            if((*ratunek)[kolo-1] == 0){
+                printf("Uzyles juz danego kola!\n");
+                break;
+            }
+            if(kolo==1){
+                // UZUPELNIC
+                printf("Pytanie do publicznosci\n");
             }
             if(kolo==2){
-                fifty_fifty(head->pytanie.poprawna_odpowiedz);
+                fifty_fifty(head->pytanie.poprawna_odpowiedz, head);
+            }
+            if(kolo==3){
+                // UZUPELNIC
+                printf("Telefon do przyjaciela\n");
             }
         }
-        *ratunek[kolo-1] = 0;
+        (*ratunek)[kolo-1] = 0;
+        liczba_dostepnych_kol = ((*ratunek)[0]) + ((*ratunek)[1]) + ((*ratunek)[2]);
+        if(liczba_dostepnych_kol == 0){
+            printf("\nWykorzystales wszystkie kola ratunkowe\n");
+            printf("Wybierz '1' by zaznaczyc odpowiedz.\n");
+            printf("Wybierz inna cyfre by zrezygnowac z dalszej gry.\n");
+            decyzja2=safescanf();
+            if(decyzja2==1){
+                printf("Podaj jedna z odpowiedzi a-d");
+                if(wczytaj_i_sprawdz_odpowiedz(head)){
+                    *wynik = 0;
+                }
+                else{
+                    *wynik = 1;
+                    komunikat_zla_odp(head);
+                }
+            }
+            else{
+                *wynik = 2;
+            }
+            break;
+        }
+        
+        printf("Wybierz '1' by zaznaczyc odpowiedz.\n");
+        printf("Wybierz '2' by zrezygnowac z dalszej gry.\n");
+        printf("Wybierz inna cyfre aby przejsc do menu wyboru kolejego kola.\n");
+        decyzja2=safescanf();
+        if(decyzja2==1){
+            printf("Podaj jedna z odpowiedzi a-d");
+            if(wczytaj_i_sprawdz_odpowiedz(head)){
+                *wynik = 0;
+            }
+            else{
+                *wynik = 1;
+                komunikat_zla_odp(head);
+            }
+            break;
+        }
+        else if(decyzja2==2){
+            *wynik = 2;
+            break;
+        }
     }
 }
 
@@ -468,24 +545,7 @@ void play(Element* head){
                 }
             }
             else if(decyzja==2){
-                printf("Ktorego z kol chcesz uzyc? \n");
-                printf("1. Pytanie do Publicznosci\n");
-                printf("2. 50/50\n");
-                printf("3. Telefon do przyjaciela");
-                int kolo = -1;
-                while(kolo<1 or kolo>3){
-                    kolo = safescanf();
-                    if(kolo<1 or kolo>3){
-                        printf("Podaj liczbe z przedzialu 1-3.\n");
-                    }
-                    if(!ratunek[kolo-1]){
-                        printf("Uzyles juz danego kola!");
-                    }
-                    if(kolo==2){
-                        fifty_fifty(head->pytanie.poprawna_odpowiedz);
-                    }
-                }
-                //kola_ratunkowe(head, &ratunek);
+                kola_ratunkowe(head, &ratunek, &wynik);
             }
             else if(decyzja==3){
                 wynik = 2;
@@ -505,7 +565,7 @@ void play(Element* head){
 }
 
 int main(){
-    clearconsole();
+    //clearconsole();
     int liczba_pytan_plik = 0;
     char *nazwa_pliku = "lista_pytan.txt";
     char *nazwa_fabryczna = "lista_fabryczna.txt";
@@ -561,13 +621,13 @@ int main(){
                 break;
             case 3:
                 przywroc_fabryczne_w_r(nazwa_pliku,nazwa_fabryczna);
-                clearconsole();
+                //clearconsole();
                 printf("Przywrocono ustawienia fabryczne.\n");
                 sleep(1);
                 printf("W puli znajduje sie teraz %d pytan.\n", liczba_pytan_plik);
                 break;
             case 4:
-                clearconsole();
+                //clearconsole();
                 printf("Do zobaczenia!");
                 return 0;
                 break;
